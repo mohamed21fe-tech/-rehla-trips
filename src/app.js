@@ -9,10 +9,12 @@ const { getDict } = require('./i18n');
 const app = express();
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '..', 'views'));
-app.set('query parser', 'simple');
 
+// 🔥 FIX 1: Parse URL-encoded bodies
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, '..', 'public'), { maxAge: '1d' }));
+
+// 🔥 FIX 2: Session
 app.use(
   session({
     secret: process.env.SESSION_SECRET || 'dev-secret-change-in-production',
@@ -22,9 +24,16 @@ app.use(
   })
 );
 
-// ---------- Helpers ----------
+// 🔥 FIX 3: Global middleware to ALWAYS create req.query and req.body
+app.use((req, res, next) => {
+  req.query = req.query || {};
+  req.body = req.body || {};
+  next();
+});
 
+// ---------- Helpers ----------
 function resolveLang(req) {
+  // 🔥 SAFE: req.query and req.body are guaranteed to exist now
   const q = req.query.lang || req.body.lang;
   return q === 'en' ? 'en' : 'ar';
 }
@@ -48,8 +57,7 @@ function todayStr() {
 }
 
 function generateReference() {
-  // Human-friendly, hard to guess sequentially: e.g. RH-7K3F9Q
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no ambiguous chars (0,O,1,I)
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let code = '';
   for (let i = 0; i < 6; i++) {
     code += chars[crypto.randomInt(0, chars.length)];
@@ -57,7 +65,6 @@ function generateReference() {
   return `RH-${code}`;
 }
 
-// Basic phone validation: digits, spaces, +, - ; 8-15 digits total.
 function isValidPhone(phone) {
   const digits = (phone || '').replace(/[^0-9]/g, '');
   return digits.length >= 8 && digits.length <= 15;
@@ -84,7 +91,6 @@ const statusLabelKey = {
 };
 
 // ---------- Queries ----------
-
 function getActiveCities() {
   return db.prepare('SELECT * FROM cities WHERE is_active = 1 ORDER BY name_en').all();
 }
@@ -124,7 +130,6 @@ function getTripWithCities(tripId) {
 }
 
 // ---------- Public routes ----------
-
 app.get('/', (req, res) => {
   const t = res.locals.t;
   res.render('home', {
@@ -207,7 +212,7 @@ app.post('/trip/:id/book', (req, res) => {
     });
   }
 
-  // Duplicate-booking guard: same phone + same trip within the last 15 minutes.
+  // Duplicate-booking guard
   const recentDuplicate = db
     .prepare(
       `SELECT id FROM bookings
@@ -227,7 +232,6 @@ app.post('/trip/:id/book', (req, res) => {
     });
   }
 
-  // Re-check seat availability and decrement atomically within a transaction-like sequence.
   const freshTrip = db.prepare('SELECT available_seats FROM trips WHERE id = ?').get(trip.id);
   if (!freshTrip || freshTrip.available_seats < seats) {
     return res.render('trip', {
@@ -240,7 +244,6 @@ app.post('/trip/:id/book', (req, res) => {
   }
 
   let reference = generateReference();
-  // Ensure uniqueness (extremely unlikely to collide, but guard anyway).
   while (db.prepare('SELECT id FROM bookings WHERE booking_reference = ?').get(reference)) {
     reference = generateReference();
   }
@@ -319,8 +322,7 @@ app.get('/lookup', (req, res) => {
   });
 });
 
-// ---------- Operator (admin) routes ----------
-
+// ---------- Operator routes ----------
 app.get('/operator/login', (req, res) => {
   const t = res.locals.t;
   if (req.session.operatorId) return res.redirect(`/operator/dashboard?lang=${t.lang}`);
@@ -452,7 +454,6 @@ app.post('/operator/bookings/:id/status', requireOperator, (req, res) => {
     return res.status(404).send('Not found.');
   }
 
-  // Only allow sane transitions.
   const allowedFrom = {
     confirmed: ['pending'],
     cancelled: ['pending', 'confirmed'],
@@ -469,7 +470,6 @@ app.post('/operator/bookings/:id/status', requireOperator, (req, res) => {
       `INSERT INTO booking_status_logs (booking_id, old_status, new_status, changed_by) VALUES (?, ?, ?, ?)`
     ).run(booking.id, booking.status, status, `operator:${req.session.operatorId}`);
 
-    // Cancelling a previously pending/confirmed booking releases its seats.
     if (status === 'cancelled') {
       db.prepare('UPDATE trips SET available_seats = available_seats + ? WHERE id = ?').run(
         booking.seats_count,
@@ -486,7 +486,6 @@ app.post('/operator/bookings/:id/status', requireOperator, (req, res) => {
 });
 
 // ---------- Fallback ----------
-
 app.use((req, res) => {
   res.status(404).send('Page not found.');
 });
