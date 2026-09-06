@@ -1,0 +1,59 @@
+<%- include('partials/head', { t, altLangUrl, pageTitle: t.bookingFormTitle }) %>
+
+<main>
+  <div class="container">
+    <p><a href="javascript:history.back()">&larr; <%= t.back %></a></p>
+
+    <div class="card mb-0">
+      <h2><%= t.tripSummary %></h2>
+      <p class="mb-0">
+        <strong><%= t.lang === 'ar' ? trip.origin_ar : trip.origin_en %> &rarr; <%= t.lang === 'ar' ? trip.destination_ar : trip.destination_en %></strong>
+      </p>
+      <p class="muted mb-0"><%= trip.date %> &middot; <%= t.departure %>: <%= trip.departure_time %></p>
+      <p class="muted mb-0"><%= t['vehicle_' + trip.vehicle_type] %> &middot; <%= t.operator %>: <%= trip.company_name %></p>
+      <p class="price mb-0"><%= trip.price_syp.toLocaleString() %> <%= t.perSeat %></p>
+    </div>
+
+    <hr class="divider">
+
+    <h2><%= t.bookingFormTitle %></h2>
+
+    <% if (typeof errorBanner !== 'undefined' && errorBanner) { %>
+      <div class="form-error-banner"><%= errorBanner %></div>
+    <% } %>
+
+    <form method="POST" action="/trip/<%= trip.id %>/book" class="stack" novalidate>
+      <input type="hidden" name="lang" value="<%= t.lang %>">
+      <div>
+        <label for="passenger_name"><%= t.passengerName %></label>
+        <input type="text" id="passenger_name" name="passenger_name" required
+               value="<%= typeof form !== 'undefined' ? form.passenger_name || '' : '' %>">
+        <div class="field-error"><%= typeof fieldErrors !== 'undefined' ? (fieldErrors.passenger_name || '') : '' %></div>
+      </div>
+      <div>
+        <label for="passenger_phone"><%= t.passengerPhone %></label>
+        <input type="tel" id="passenger_phone" name="passenger_phone" required inputmode="tel"
+               placeholder="09xxxxxxxx"
+               value="<%= typeof form !== 'undefined' ? form.passenger_phone || '' : '' %>">
+        <div class="field-error"><%= typeof fieldErrors !== 'undefined' ? (fieldErrors.passenger_phone || '') : '' %></div>
+      </div>
+      <div>
+        <label for="passenger_id_number"><%= t.passengerId %></label>
+        <input type="text" id="passenger_id_number" name="passenger_id_number"
+               value="<%= typeof form !== 'undefined' ? form.passenger_id_number || '' : '' %>">
+      </div>
+      <div>
+        <label for="seats_count"><%= t.seatsCount %></label>
+        <select id="seats_count" name="seats_count" required>
+          <% for (let i = 1; i <= Math.min(trip.available_seats, 6); i++) { %>
+            <option value="<%= i %>" <%= (typeof form !== 'undefined' && String(form.seats_count) === String(i)) ? 'selected' : '' %>><%= i %></option>
+          <% } %>
+        </select>
+        <div class="field-error"><%= typeof fieldErrors !== 'undefined' ? (fieldErrors.seats_count || '') : '' %></div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block"><%= t.confirmBooking %></button>
+    </form>
+  </div>
+</main>
+
+<%- include('partials/tail', { t }) %>

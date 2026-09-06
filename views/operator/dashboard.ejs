@@ -1,0 +1,56 @@
+<%- include('../partials/head', { t, altLangUrl, pageTitle: t.dashboardTitle }) %>
+
+<main>
+  <div class="container">
+    <div class="spread">
+      <h1 class="mb-0"><%= t.dashboardTitle %></h1>
+      <form method="POST" action="/operator/logout">
+        <input type="hidden" name="lang" value="<%= t.lang %>">
+        <button type="submit" class="btn btn-outline btn-sm"><%= t.logout %></button>
+      </form>
+    </div>
+    <p class="muted"><%= operator.company_name %></p>
+
+    <div class="spread mt-5">
+      <h2 class="mb-0"><%= t.myTrips %></h2>
+      <a class="btn btn-primary btn-sm" href="/operator/trips/new?lang=<%= t.lang %>"><%= t.addTrip %></a>
+    </div>
+
+    <% if (trips.length === 0) { %>
+      <div class="empty-state card mt-5"><%= t.tripsListEmpty %></div>
+    <% } else { %>
+      <div class="table-scroll mt-5">
+        <table>
+          <thead>
+            <tr>
+              <th><%= t.originCity %></th>
+              <th><%= t.destCity %></th>
+              <th><%= t.date %></th>
+              <th><%= t.departureTime %></th>
+              <th><%= t.seats %></th>
+              <th><%= t.priceSyp %></th>
+              <th><%= t.status %></th>
+              <th><%= t.actions %></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% trips.forEach(function(trip) { %>
+              <tr>
+                <td><%= t.lang === 'ar' ? trip.origin_ar : trip.origin_en %></td>
+                <td><%= t.lang === 'ar' ? trip.destination_ar : trip.destination_en %></td>
+                <td><%= trip.date %></td>
+                <td><%= trip.departure_time %></td>
+                <td><%= trip.available_seats %>/<%= trip.total_seats %></td>
+                <td><%= trip.price_syp.toLocaleString() %></td>
+                <td><span class="status-pill status-<%= trip.status === 'active' ? 'confirmed' : (trip.status === 'cancelled' ? 'cancelled' : 'no_show') %>"><%= trip.status %></span></td>
+                <td><a href="/operator/trips/<%= trip.id %>/bookings?lang=<%= t.lang %>"><%= t.viewBookings %></a></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+</main>
+
+<%- include('../partials/tail', { t }) %>

@@ -1,0 +1,27 @@
+<%- include('../partials/head', { t, altLangUrl, pageTitle: t.operatorLoginTitle }) %>
+
+<main>
+  <div class="container">
+    <h1><%= t.operatorLoginTitle %></h1>
+
+    <% if (typeof errorBanner !== 'undefined' && errorBanner) { %>
+      <div class="form-error-banner"><%= errorBanner %></div>
+    <% } %>
+
+    <form method="POST" action="/operator/login" class="card stack">
+      <input type="hidden" name="lang" value="<%= t.lang %>">
+      <div>
+        <label for="username"><%= t.username %></label>
+        <input type="text" id="username" name="username" required autocomplete="username">
+      </div>
+      <div>
+        <label for="password"><%= t.password %></label>
+        <input type="password" id="password" name="password" required autocomplete="current-password">
+      </div>
+      <button type="submit" class="btn btn-primary btn-block"><%= t.login %></button>
+    </form>
+    <p class="muted mt-5">demo: sham_express / demo1234</p>
+  </div>
+</main>
+
+<%- include('../partials/tail', { t }) %>

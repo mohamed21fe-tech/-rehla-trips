@@ -1,0 +1,49 @@
+<%- include('partials/head', { t, altLangUrl, pageTitle: t.resultsTitle }) %>
+
+<main>
+  <div class="container">
+    <p><a href="/?lang=<%= t.lang %>">&larr; <%= t.back %></a></p>
+    <h1><%= t.resultsTitle %></h1>
+    <p class="muted">
+      <%= t.resultsFor.replace('%o', t.lang === 'ar' ? origin.name_ar : origin.name_en)
+                       .replace('%d', t.lang === 'ar' ? destination.name_ar : destination.name_en)
+                       .replace('%date%', date) %>
+    </p>
+
+    <% if (trips.length === 0) { %>
+      <div class="empty-state card">
+        <p><strong><%= t.noResults %></strong></p>
+        <p><%= t.tryOtherDate %></p>
+      </div>
+    <% } else { %>
+      <% trips.forEach(function(trip) { %>
+        <div class="trip-card">
+          <div class="row1">
+            <div>
+              <div class="trip-time"><%= trip.departure_time %></div>
+              <div class="trip-meta">
+                <%= t['vehicle_' + trip.vehicle_type] %> &middot; <%= t.operator %>: <%= trip.company_name %>
+              </div>
+              <div class="trip-meta"><%= t.duration %>: <%= trip.duration_minutes %> <%= t.minutes %></div>
+            </div>
+            <div class="price"><%= trip.price_syp.toLocaleString() %> <%= t.perSeat %></div>
+          </div>
+          <div class="row2">
+            <% if (trip.available_seats === 0) { %>
+              <span class="badge badge-soldout"><%= t.soldOut %></span>
+            <% } else if (trip.available_seats <= 4) { %>
+              <span class="badge badge-low"><%= trip.available_seats %> <%= trip.available_seats === 1 ? t.seatsLeft : t.seatsLeftPlural %></span>
+            <% } else { %>
+              <span class="badge badge-available"><%= trip.available_seats %> <%= t.seatsLeftPlural %></span>
+            <% } %>
+            <% if (trip.available_seats > 0) { %>
+              <a class="btn btn-primary btn-sm" href="/trip/<%= trip.id %>?lang=<%= t.lang %>"><%= t.bookNow %></a>
+            <% } %>
+          </div>
+        </div>
+      <% }) %>
+    <% } %>
+  </div>
+</main>
+
+<%- include('partials/tail', { t }) %>

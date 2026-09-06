@@ -1,0 +1,43 @@
+<%- include('partials/head', { t, altLangUrl, pageTitle: t.navSearch }) %>
+
+<section class="hero">
+  <div class="container">
+    <h1><%= t.homeHeroTitle %></h1>
+    <p class="sub"><%= t.homeHeroSub %></p>
+
+    <form class="card" method="GET" action="/search">
+      <input type="hidden" name="lang" value="<%= t.lang %>">
+      <div class="form-grid cols-3">
+        <div>
+          <label for="origin"><%= t.from %></label>
+          <select id="origin" name="origin" required>
+            <option value="" disabled <%= !query.origin ? 'selected' : '' %>>—</option>
+            <% cities.forEach(function(c) { %>
+              <option value="<%= c.id %>" <%= String(query.origin) === String(c.id) ? 'selected' : '' %>>
+                <%= t.lang === 'ar' ? c.name_ar : c.name_en %>
+              </option>
+            <% }) %>
+          </select>
+        </div>
+        <div>
+          <label for="destination"><%= t.to %></label>
+          <select id="destination" name="destination" required>
+            <option value="" disabled <%= !query.destination ? 'selected' : '' %>>—</option>
+            <% cities.forEach(function(c) { %>
+              <option value="<%= c.id %>" <%= String(query.destination) === String(c.id) ? 'selected' : '' %>>
+                <%= t.lang === 'ar' ? c.name_ar : c.name_en %>
+              </option>
+            <% }) %>
+          </select>
+        </div>
+        <div>
+          <label for="date"><%= t.date %></label>
+          <input type="date" id="date" name="date" required min="<%= today %>" value="<%= query.date || today %>">
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block mt-5"><%= t.search %></button>
+    </form>
+  </div>
+</section>
+
+<%- include('partials/tail', { t }) %>

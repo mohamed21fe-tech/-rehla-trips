@@ -1,0 +1,20 @@
+<%- include('partials/head', { t, altLangUrl, pageTitle: t.bookingSuccessTitle }) %>
+
+<main>
+  <div class="container">
+    <div class="card text-center">
+      <h1><%= t.bookingSuccessTitle %></h1>
+      <p><%= t.bookingSuccessMsg %></p>
+      <div class="ref-code"><%= booking.booking_reference %></div>
+      <p class="muted">
+        <%= t.lang === 'ar' ? trip.origin_ar : trip.origin_en %> &rarr; <%= t.lang === 'ar' ? trip.destination_ar : trip.destination_en %>
+        &middot; <%= trip.date %> <%= trip.departure_time %>
+      </p>
+      <p class="muted"><%= t.seatsCount %>: <%= booking.seats_count %></p>
+      <p><span class="status-pill status-pending"><%= t.statusPending %></span></p>
+      <a href="/?lang=<%= t.lang %>" class="btn btn-outline mt-5"><%= t.back %></a>
+    </div>
+  </div>
+</main>
+
+<%- include('partials/tail', { t }) %>

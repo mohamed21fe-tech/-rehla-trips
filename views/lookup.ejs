@@ -1,0 +1,38 @@
+<%- include('partials/head', { t, altLangUrl, pageTitle: t.lookupTitle }) %>
+
+<main>
+  <div class="container">
+    <h1><%= t.lookupTitle %></h1>
+
+    <% if (typeof notFound !== 'undefined' && notFound) { %>
+      <div class="form-error-banner"><%= t.lookupNotFound %></div>
+    <% } %>
+
+    <form method="GET" action="/lookup" class="card stack">
+      <input type="hidden" name="lang" value="<%= t.lang %>">
+      <div>
+        <label for="phone"><%= t.lookupPhone %></label>
+        <input type="tel" id="phone" name="phone" required value="<%= typeof query !== 'undefined' ? (query.phone || '') : '' %>">
+      </div>
+      <div>
+        <label for="ref"><%= t.lookupRef %></label>
+        <input type="text" id="ref" name="ref" required value="<%= typeof query !== 'undefined' ? (query.ref || '') : '' %>">
+      </div>
+      <button type="submit" class="btn btn-primary btn-block"><%= t.lookupBtn %></button>
+    </form>
+
+    <% if (typeof booking !== 'undefined' && booking) { %>
+      <div class="card mt-5">
+        <h2><%= t.lookupResultTitle %></h2>
+        <p class="mb-0">
+          <strong><%= t.lang === 'ar' ? trip.origin_ar : trip.origin_en %> &rarr; <%= t.lang === 'ar' ? trip.destination_ar : trip.destination_en %></strong>
+        </p>
+        <p class="muted mb-0"><%= trip.date %> &middot; <%= trip.departure_time %></p>
+        <p class="muted mb-0"><%= t.seatsCount %>: <%= booking.seats_count %></p>
+        <p><span class="status-pill status-<%= booking.status %>"><%= statusLabel %></span></p>
+      </div>
+    <% } %>
+  </div>
+</main>
+
+<%- include('partials/tail', { t }) %>

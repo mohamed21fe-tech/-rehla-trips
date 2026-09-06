@@ -1,0 +1,73 @@
+<%- include('../partials/head', { t, altLangUrl, pageTitle: t.bookingsFor }) %>
+
+<main>
+  <div class="container">
+    <p><a href="/operator/dashboard?lang=<%= t.lang %>">&larr; <%= t.back %></a></p>
+    <h1><%= t.bookingsFor %></h1>
+    <p class="muted">
+      <%= t.lang === 'ar' ? trip.origin_ar : trip.origin_en %> &rarr; <%= t.lang === 'ar' ? trip.destination_ar : trip.destination_en %>
+      &middot; <%= trip.date %> <%= trip.departure_time %> &middot; <%= trip.available_seats %>/<%= trip.total_seats %> <%= t.seatsLeftPlural %>
+    </p>
+
+    <% if (bookings.length === 0) { %>
+      <div class="empty-state card"><%= t.tripsListEmpty %></div>
+    <% } else { %>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th><%= t.passenger %></th>
+              <th><%= t.phone %></th>
+              <th><%= t.seats %></th>
+              <th><%= t.reference %></th>
+              <th><%= t.status %></th>
+              <th><%= t.actions %></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% bookings.forEach(function(b) { %>
+              <tr>
+                <td><%= b.passenger_name %></td>
+                <td><%= b.passenger_phone %></td>
+                <td><%= b.seats_count %></td>
+                <td><%= b.booking_reference %></td>
+                <td><span class="status-pill status-<%= b.status %>"><%= statusLabels[b.status] %></span></td>
+                <td>
+                  <div class="action-row">
+                    <% if (b.status === 'pending') { %>
+                      <form method="POST" action="/operator/bookings/<%= b.id %>/status">
+                        <input type="hidden" name="lang" value="<%= t.lang %>">
+                        <input type="hidden" name="status" value="confirmed">
+                        <button type="submit" class="btn btn-primary btn-sm"><%= t.confirm %></button>
+                      </form>
+                      <form method="POST" action="/operator/bookings/<%= b.id %>/status">
+                        <input type="hidden" name="lang" value="<%= t.lang %>">
+                        <input type="hidden" name="status" value="cancelled">
+                        <button type="submit" class="btn btn-danger btn-sm"><%= t.cancel %></button>
+                      </form>
+                    <% } else if (b.status === 'confirmed') { %>
+                      <form method="POST" action="/operator/bookings/<%= b.id %>/status">
+                        <input type="hidden" name="lang" value="<%= t.lang %>">
+                        <input type="hidden" name="status" value="no_show">
+                        <button type="submit" class="btn btn-outline btn-sm"><%= t.markNoShow %></button>
+                      </form>
+                      <form method="POST" action="/operator/bookings/<%= b.id %>/status">
+                        <input type="hidden" name="lang" value="<%= t.lang %>">
+                        <input type="hidden" name="status" value="cancelled">
+                        <button type="submit" class="btn btn-danger btn-sm"><%= t.cancel %></button>
+                      </form>
+                    <% } else { %>
+                      <span class="muted">—</span>
+                    <% } %>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  </div>
+</main>
+
+<%- include('../partials/tail', { t }) %>

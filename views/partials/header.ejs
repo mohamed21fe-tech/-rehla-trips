@@ -1,0 +1,13 @@
+<header class="site-header">
+  <div class="container">
+    <a class="brand" href="/?lang=<%= t.lang %>">
+      <span><%= t.siteName %></span>
+      <small><%= t.tagline %></small>
+    </a>
+    <nav class="header-nav">
+      <a href="/lookup?lang=<%= t.lang %>"><%= t.navLookup %></a>
+      <a href="/operator/login?lang=<%= t.lang %>"><%= t.navOperator %></a>
+      <a class="lang-toggle" href="<%= altLangUrl %>"><%= t.langSwitch %></a>
+    </nav>
+  </div>
+</header>

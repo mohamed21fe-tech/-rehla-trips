@@ -1,0 +1,73 @@
+<%- include('../partials/head', { t, altLangUrl, pageTitle: t.addTrip }) %>
+
+<main>
+  <div class="container">
+    <p><a href="/operator/dashboard?lang=<%= t.lang %>">&larr; <%= t.back %></a></p>
+    <h1><%= t.addTrip %></h1>
+
+    <% if (typeof errorBanner !== 'undefined' && errorBanner) { %>
+      <div class="form-error-banner"><%= errorBanner %></div>
+    <% } %>
+
+    <form method="POST" action="/operator/trips/new" class="card stack">
+      <input type="hidden" name="lang" value="<%= t.lang %>">
+      <div class="form-grid cols-2">
+        <div>
+          <label for="origin_city_id"><%= t.originCity %></label>
+          <select id="origin_city_id" name="origin_city_id" required>
+            <option value="" disabled selected>—</option>
+            <% cities.forEach(function(c) { %>
+              <option value="<%= c.id %>"><%= t.lang === 'ar' ? c.name_ar : c.name_en %></option>
+            <% }) %>
+          </select>
+        </div>
+        <div>
+          <label for="destination_city_id"><%= t.destCity %></label>
+          <select id="destination_city_id" name="destination_city_id" required>
+            <option value="" disabled selected>—</option>
+            <% cities.forEach(function(c) { %>
+              <option value="<%= c.id %>"><%= t.lang === 'ar' ? c.name_ar : c.name_en %></option>
+            <% }) %>
+          </select>
+        </div>
+      </div>
+      <div class="form-grid cols-2">
+        <div>
+          <label for="date"><%= t.date %></label>
+          <input type="date" id="date" name="date" required min="<%= today %>">
+        </div>
+        <div>
+          <label for="departure_time"><%= t.departureTime %></label>
+          <input type="time" id="departure_time" name="departure_time" required>
+        </div>
+      </div>
+      <div class="form-grid cols-2">
+        <div>
+          <label for="duration_minutes"><%= t.durationMinutes %></label>
+          <input type="number" id="duration_minutes" name="duration_minutes" min="1" required>
+        </div>
+        <div>
+          <label for="vehicle_type"><%= t.vehicleType %></label>
+          <select id="vehicle_type" name="vehicle_type" required>
+            <option value="bus"><%= t.vehicle_bus %></option>
+            <option value="minibus"><%= t.vehicle_minibus %></option>
+            <option value="shared_taxi"><%= t.vehicle_shared_taxi %></option>
+          </select>
+        </div>
+      </div>
+      <div class="form-grid cols-2">
+        <div>
+          <label for="total_seats"><%= t.totalSeats %></label>
+          <input type="number" id="total_seats" name="total_seats" min="1" max="60" required>
+        </div>
+        <div>
+          <label for="price_syp"><%= t.priceSyp %></label>
+          <input type="number" id="price_syp" name="price_syp" min="0" step="500" required>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block"><%= t.createTrip %></button>
+    </form>
+  </div>
+</main>
+
+<%- include('../partials/tail', { t }) %>
